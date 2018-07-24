@@ -17,7 +17,9 @@ CONTAINS
                       ips,ipe, jps,jpe, kps,kpe,                      & ! patch  dims
                       i_start,i_end,j_start,j_end,kts,kte,num_tiles   &
                      ,is_restart                                      & ! CLWRF
+                     ,num_z_levels                                    & ! CLWRF
                      ,clwrfH,t2,q2,u10,v10, skintemp                  & ! CLWRF
+                     ,u_zl,v_zl,wpd_zl                                & ! CLWRF
                      ,t2clmin,t2clmax,tt2clmin,tt2clmax               & ! CLWRF
                      ,t2clmean,t2clstd                                & ! CLWRF
                      ,q2clmin,q2clmax,tq2clmin,tq2clmax               & ! CLWRF
@@ -25,6 +27,12 @@ CONTAINS
                      ,u10clmax,v10clmax,spduv10clmax,tspduv10clmax    & ! CLWRF
                      ,u10clmean,v10clmean,spduv10clmean               & ! CLWRF
                      ,u10clstd,v10clstd,spduv10clstd                  & ! CLWRF
+                     ,u_zlclmax,v_zlclmax                             & ! CLWRF
+                     ,spduv_zlclmax,tspduv_zlclmax                    & ! CLWRF
+                     ,u_zlclmean,v_zlclmean,spduv_zlclmean            & ! CLWRF
+                     ,u_zlclstd,v_zlclstd,spduv_zlclstd               & ! CLWRF
+                     ,wpd_zlclmax,twpd_zlclmax                        & ! CLWRF
+                     ,wpd_zlclmean,wpd_zlclstd                        & ! CLWRF
                      ,raincclmax,rainncclmax,traincclmax,trainncclmax & ! CLWRF
                      ,raincclmean,rainncclmean,raincclstd,rainncclstd & ! CLWRF
                      ,skintempclmin,skintempclmax                     & ! CLWRF
@@ -142,6 +150,20 @@ CONTAINS
 ! local vars
    REAL                                      :: t273
 
+!!!-----------
+!!! Added some wind variables to extremes - for wind power purposes - combined with interpolation to z levels
+   
+   INTEGER, INTENT(IN)                       :: num_z_levels
+   REAL   , INTENT(IN) ,  DIMENSION(ims:ime , num_z_levels , jms:jme) :: u_zl,v_zl,wpd_zl
+   REAL   , INTENT( OUT) ,  DIMENSION(ims:ime , num_z_levels , jms:jme) ::  u_zlclmax,v_zlclmax                             & 
+                                                                           ,spduv_zlclmax,tspduv_zlclmax                    & 
+                                                                           ,u_zlclmean,v_zlclmean,spduv_zlclmean            & 
+                                                                           ,u_zlclstd,v_zlclstd,spduv_zlclstd               &
+                                                                           ,wpd_zlclmax,twpd_zlclmax                        &
+                                                                           ,wpd_zlclmean,wpd_zlclstd 
+                  
+                                                                          
+
 !-----------------------------------------------------------------
 
    t273  = 273.
@@ -185,6 +207,17 @@ CONTAINS
           skintempclmax(i,j)=skintemp(i,j)-t273
           skintempclmean(i,j)=skintemp(i,j)-t273
           skintempclstd(i,j)=(skintemp(i,j)-t273)*(skintemp(i,j)-t273)
+          DO k = 1,num_z_levels
+            spduv_zlclmax(i,k,j)=sqrt(u_zl(i,k,j)*u_zl(i,k,j)+v_zl(i,k,j)*v_zl(i,k,j))
+            spduv_zlclmean(i,k,j)=sqrt(u_zl(i,k,j)*u_zl(i,k,j)+v_zl(i,k,j)*v_zl(i,k,j))
+            u_zlclmean(i,k,j)=u_zl(i,k,j)
+            v_zlclmean(i,k,j)=v_zl(i,k,j)
+            wpd_zlclmean(i,k,j)=wpd_zl(i,k,j)
+            u_zlclstd(i,k,j)=u_zl(i,k,j)*u_zl(i,k,j)
+            v_zlclstd(i,k,j)=v_zl(i,k,j)*v_zl(i,k,j)
+            wpd_zlclstd(i,k,j)=wpd_zl(i,k,j)*wpd_zl(i,k,j)
+            wpd_zlclmax(i,k,j)=wpd_zl(i,k,j)
+          ENDDO   
         ENDDO
       ENDDO
     ENDDO
@@ -211,6 +244,11 @@ CONTAINS
           CALL varstatistics(skintemp-t273,xtimep,ime-ims+1,jme-jms+1,skintempclmin,&
             skintempclmax,tskintempclmin,tskintempclmax,skintempclmean,       &
             skintempclstd)
+! Wind speed zlevs and wind power density
+          CALL varstatisticsWINDZL(u_zl,v_zl,wpd_zl,xtimep,ime-ims+1,jme-jms+1,num_z_levels, u_zlclmax, &
+            v_zlclmax,wpd_zlclmax,twpd_zlclmax,spduv_zlclmax,tspduv_zlclmax,u_zlclmean,v_zlclmean,         &
+            wpd_zlclmean,spduv_zlclmean,u_zlclstd,v_zlclstd,wpd_zlclstd,spduv_zlclstd)            
+
 
 !          IF (MOD(NINT(XTIME),clwrfH) == 0) THEN
 !          IF (MOD(NINT(XTIME+dt/60.),clwrfH) == 0) THEN
@@ -244,6 +282,19 @@ CONTAINS
                skintempclmean=skintempclmean+t273
                skintempclmin=skintempclmin+t273
                skintempclmax=skintempclmax+t273
+          
+      
+               spduv_zlclmean=spduv_zlclmean/nsteps
+               u_zlclmean=u_zlclmean/nsteps
+               v_zlclmean=v_zlclmean/nsteps
+               wpd_zlclmean=wpd_zlclmean/nsteps
+               
+               spduv_zlclstd=SQRT(spduv_zlclstd/nsteps-spduv_zlclmean**2.)
+               u_zlclstd=SQRT(u_zlclstd/nsteps-u_zlclmean**2.)
+               v_zlclstd=SQRT(v_zlclstd/nsteps-v_zlclmean**2.)
+               wpd_zlclstd=SQRT(wpd_zlclstd/nsteps-wpd_zlclmean**2.)
+
+               
              IF  ( wrf_dm_on_monitor() ) THEN
                DO ij = 1 , num_tiles
                idp = i_start(ij)+(i_end(ij)-i_start(ij))/2
@@ -294,9 +345,18 @@ CONTAINS
                  ' SKINTEMPclmean:',skintempclmean(idp,jdp),          &
                  ' SKINTEMPclstd:',skintempclstd(idp,jdp)
                CALL wrf_debug(75, message)
+               WRITE(message,*)'CLWRFdiag - WIND POWER; tile: ',ij,     &
+                 ' WPDZLclmax:',wpd_zlclmax(idp,:,jdp),               &
+                 ' SPDUVZLclmax:',spduv_zlclmax(idp,:,jdp),           &
+                 ' WPDZLclmean:',wpd_zlclmean(idp,:,jdp),             &
+                 ' SPDUVZLclmean:',spduv_zlclmean(idp,:,jdp),          &
+                 ' WPDZLclstd:',wpd_zlclstd(idp,:,jdp),             &
+                 ' SPDUVZLclstd:',spduv_zlclstd(idp,:,jdp)         
+               CALL wrf_debug(75, message)
+               
                ENDDO
              ENDIF
-           END IF
+           ENDIF
 !        ENDDO
 !      ENDDO
   ENDIF
@@ -340,6 +400,62 @@ varustd=varustd+varu*varu
 varvstd=varvstd+varv*varv
 
 END SUBROUTINE varstatisticsWIND
+
+SUBROUTINE varstatisticsWINDZL(u_zl,v_zl,wpd_zl,tt,dx,dy,dz,umax, &
+  vmax,wpdmax,twpdmax,spdmax,tspdmax,umean,vmean,         &
+  wpdmean,spdmean,ustd,vstd,wpdstd,spdstd)
+
+!Subrountine to compute statistics for wind variables at different z-levels
+
+IMPLICIT NONE
+
+INTEGER                                                        :: i, j, k
+INTEGER, INTENT(IN)                                            :: dx, dy, dz
+REAL, DIMENSION(dx,dz,dy), INTENT (IN)                         :: u_zl,v_zl,wpd_zl
+REAL, INTENT(IN)                                               :: tt
+REAL, DIMENSION(dx,dz,dy), INTENT (OUT)                        ::  umax,vmax,wpdmax,twpdmax  &
+                                                                  ,spdmax,tspdmax            &
+                                                                  ,umean,vmean,wpdmean       &
+                                                                  ,spdmean                   &
+                                                                  ,ustd,vstd,wpdstd          &
+                                                                  ,spdstd
+REAL                                                           :: spd
+
+
+DO i=1,dx
+  DO j=1,dy
+    DO k=1,dz
+      spd = sqrt(u_zl(i,k,j)*u_zl(i,k,j)+v_zl(i,k,j)*v_zl(i,k,j))
+      IF (spd > spdmax(i,k,j)) THEN
+        umax(i,k,j)=u_zl(i,k,j)
+        vmax(i,k,j)=v_zl(i,k,j)
+        spdmax(i,k,j)=spd
+        tspdmax(i,k,j)=tt
+      END IF
+      
+      IF (wpd_zl(i,k,j) > wpdmax(i,k,j)) THEN
+        wpdmax(i,k,j)=wpd_zl(i,k,j)
+        twpdmax(i,k,j)=tt
+      END IF
+      
+      spdmean(i,k,j) = spdmean(i,k,j) + spd
+      spdstd(i,k,j) = spdstd(i,k,j) + spd*spd
+END DO
+END DO
+END DO      
+umean = umean + u_zl      
+vmean = vmean + v_zl
+wpdmean = wpdmean + wpd_zl
+
+ustd = ustd + u_zl*u_zl
+vstd = vstd + v_zl*v_zl
+wpdstd = wpdstd + wpd_zl*wpd_zl
+
+END SUBROUTINE varstatisticsWINDZL
+
+
+
+
 
 SUBROUTINE varstatisticsMAX(var, tt, dx, dy, varmax, tvarmax, varmean,       &
    varstd)

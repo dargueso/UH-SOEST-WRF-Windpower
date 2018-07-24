@@ -734,9 +734,11 @@ CONTAINS
 
          CALL clwrf_output_calc(                                           &
                      is_restart=config_flags%restart                       &
+                    ,NUM_Z_LEVELS=config_flags%num_z_levels                & 
                     ,clwrfH=config_flags%auxhist3_interval                 &
                     ,T2=grid%t2, Q2=grid%q2, U10=grid%u10, V10=grid%v10    &
                     ,SKINTEMP=grid%tsk                                     &
+                    ,U_ZL=grid%u_zl,V_ZL=grid%v_zl,WPD_ZL=grid%wpd_zl      &
                     ,T2CLMIN=grid%t2min, T2CLMAX=grid%t2max                &
                     ,TT2CLMIN=grid%tt2min, TT2CLMAX=grid%tt2max            &
                     ,T2CLMEAN=grid%t2mean, T2CLSTD=grid%t2std              &
@@ -750,6 +752,19 @@ CONTAINS
                     ,SPDUV10CLMEAN=grid%spduv10mean                        &
                     ,U10CLSTD=grid%u10std, V10CLSTD=grid%v10std            &
                     ,SPDUV10CLSTD=grid%spduv10std                          &
+                    ,U_ZLCLMAX=grid%u_zlmax,V_ZLCLMAX=grid%v_zlmax     &
+                    ,SPDUV_ZLCLMAX=grid%spduv_zlmax                      &
+                    ,TSPDUV_ZLCLMAX=grid%tspduv_zlmax                    &
+                    ,U_ZLCLMEAN=grid%u_zlmean                            &
+                    ,V_ZLCLMEAN=grid%v_zlmean                            &
+                    ,SPDUV_ZLCLMEAN=grid%spduv_zlmean                    &
+                    ,U_ZLCLSTD=grid%u_zlstd                              &
+                    ,V_ZLCLSTD=grid%v_zlstd                              &
+                    ,SPDUV_ZLCLSTD=grid%spduv_zlstd                      &
+                    ,WPD_ZLCLMAX=grid%wpd_zlmax                          &
+                    ,TWPD_ZLCLMAX=grid%twpd_zlmax                        &
+                    ,WPD_ZLCLMEAN=grid%wpd_zlmean                        &
+                    ,WPD_ZLCLSTD=grid%wpd_zlstd                          &
                     ,RAINCCLMAX=grid%raincvmax                             &
                     ,RAINNCCLMAX=grid%rainncvmax                           &
                     ,TRAINCCLMAX=grid%traincvmax                           &
@@ -884,6 +899,7 @@ CONTAINS
                       ,pb=grid%pb                                           &
                       ,p=grid%p_hyd                                         &
                       ,pw=grid%p_hyd_w                                      &
+                      ,rho=grid%rho                                    &
                !  Map factors, coriolis for diags
                       ,msfux=grid%msfux                                     &
                       ,msfuy=grid%msfuy                                     &
@@ -911,6 +927,7 @@ CONTAINS
                       ,s_zl  = grid%s_zl                                    &
                       ,td_zl = grid%td_zl                                   &
                       ,q_zl = grid%q_zl                                     &
+                      ,wpd_zl = grid%wpd_zl                                 &
                !  Dimension arguments
                       ,IDS=ids,IDE=ide, JDS=jds,JDE=jde, KDS=kds,KDE=kde    &
                       ,IMS=ims,IME=ime, JMS=jms,JME=jme, KMS=kms,KME=kme    &

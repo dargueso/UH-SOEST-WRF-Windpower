@@ -1915,6 +1915,7 @@ DEALLOCATE(z_at_q)
                  ,pb=grid%pb                    &
                  ,p=grid%p_hyd                  &
                  ,pw=grid%p_hyd_w               &
+                 ,rho=grid%rho                  &
                  !  Map factors, coriolis for diags
                  ,msfux=grid%msfux              &
                  ,msfuy=grid%msfuy              &
@@ -1942,6 +1943,7 @@ DEALLOCATE(z_at_q)
                  ,s_zl  = grid%s_zl             &  
                  ,td_zl = grid%td_zl            &
                  ,q_zl = grid%q_zl              &
+                 ,wpd_zl=grid%wpd_zl              &
                  !  Dimension arguments
                  ,IDS=ids,IDE=ide, JDS=jds,JDE=jde, KDS=kds,KDE=kde    &
                  ,IMS=ims,IME=ime, JMS=jms,JME=jme, KMS=kms,KME=kme    &

@@ -11,13 +11,13 @@ END MODULE module_diag_zld
 MODULE module_diag_zld
 CONTAINS
 
-   SUBROUTINE zld ( u,v,w,t,qv,zp,zb,pp,pb,p,pw,                    &
+   SUBROUTINE zld ( u,v,w,t,qv,zp,zb,pp,pb,p,pw,rho,                &
                     msfux,msfuy,msfvx,msfvy,msftx,msfty,            &
                     f,e,ht,                                         &
                     use_tot_or_hyd_p,extrap_below_grnd,missing,     &  
                     num_z_levels,max_z_levels,z_levels,             &
                     z_zl,u_zl,v_zl,t_zl,rh_zl,ght_zl,s_zl,td_zl,    &
-                    q_zl,                                           &
+                    q_zl,wpd_zl,                                    &
                     ids,ide, jds,jde, kds,kde,                      &
                     ims,ime, jms,jme, kms,kme,                      &
                     its,ite, jts,jte, kts,kte                       )
@@ -37,14 +37,14 @@ CONTAINS
       INTEGER, INTENT(IN   )                                          :: use_tot_or_hyd_p
       INTEGER, INTENT(IN   )                                          :: extrap_below_grnd
       REAL   , INTENT(IN   )                                          :: missing
-      REAL   , INTENT(IN   ) , DIMENSION(ims:ime , kms:kme , jms:jme) :: u,v,w,t,qv,zp,zb,pp,pb,p,pw
+      REAL   , INTENT(IN   ) , DIMENSION(ims:ime , kms:kme , jms:jme) :: u,v,w,t,qv,zp,zb,pp,pb,p,pw,rho
       INTEGER, INTENT(IN   )                                          :: num_z_levels, max_z_levels
       REAL   , INTENT(IN   ) , DIMENSION(max_z_levels)                :: z_levels
    
       !  Output variables
    
       REAL   , INTENT(  OUT) ,  DIMENSION(num_z_levels)                     :: z_zl
-      REAL   , INTENT(  OUT) ,  DIMENSION(ims:ime , num_z_levels , jms:jme) :: u_zl,v_zl,t_zl,rh_zl,ght_zl,s_zl,td_zl,q_zl
+      REAL   , INTENT(  OUT) ,  DIMENSION(ims:ime , num_z_levels , jms:jme) :: u_zl,v_zl,t_zl,rh_zl,ght_zl,s_zl,td_zl,q_zl,wpd_zl
    
       !  Local variables
    
@@ -60,7 +60,8 @@ CONTAINS
                  qu, qd     , &
                  eu, ed, em , &
                  pu, pd, pm , &
-                 du, dd
+                 du, dd,      &
+                 rhou,rhod,rhom
       REAL    :: es, qs
       REAL    :: part, gammas, tvu, tvd
    
@@ -82,6 +83,7 @@ CONTAINS
                ght_zl(i,kz,j) = missing
                s_zl  (i,kz,j) = missing
                td_zl (i,kz,j) = missing
+               wpd_zl(i,kz,j) = missing
             END DO
          END DO
       END DO
@@ -172,6 +174,17 @@ CONTAINS
                      rh_zl(i,kz,j)   = q_zl(i,kz,j) / qs * 100.
    
                      ke_h = ke
+                     
+                     ! 8. Air density (kg m-3)
+                     rhou = rho(i,ke+1,j)
+                     rhod = rho(i,ke  ,j)
+                     
+                     rhom = ( rhou * (zm-zd) + rhod * (zu-zm) ) / (zu-zd)
+                     
+                     ! 7. Wind power density (W m-2)
+                     
+                     wpd_zl(i,kz,j) = 0.5*rhom*((u_zl(i,kz,j)**2.+v_zl(i,kz,j)**2.)**0.5)**3.
+                     
                      EXIT ke_loop_half
                   END IF
                END DO ke_loop_half

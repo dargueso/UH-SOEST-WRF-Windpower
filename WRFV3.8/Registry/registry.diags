@@ -64,13 +64,29 @@ state    real   z_zl    {nz}    misc    1  Z   h{22}  "Z_ZL"    "Height level da
 state    real   u_zl   i{nz}j   misc    1  Z   h{22}  "U_ZL"    "Height level data, U wind"                "m s-1"
 state    real   v_zl   i{nz}j   misc    1  Z   h{22}  "V_ZL"    "Height level data, V wind"                "m s-1"
 state    real   t_zl   i{nz}j   misc    1  Z   h{22}  "T_ZL"    "Height level data, Temperature"           "K"
-state    real   rh_zl  i{nz}j   misc    1  Z   h{22}  "RH_ZL"   "Height level data, Relative humidity"     "%"
-state    real   ght_zl i{nz}j   misc    1  Z   h{22}  "GHT_ZL"  "Height level data, Geopotential Height"   "m"
-state    real   s_zl   i{nz}j   misc    1  Z   h{22}  "S_ZL"    "Height level data, Speed"                 "m s-1"
+state    real   rh_zl  i{nz}j   misc    1  Z   r  "RH_ZL"   "Height level data, Relative humidity"     "%"
+state    real   ght_zl i{nz}j   misc    1  Z   r  "GHT_ZL"  "Height level data, Geopotential Height"   "m"
+state    real   s_zl   i{nz}j   misc    1  Z   r  "S_ZL"    "Height level data, Speed"                 "m s-1"
 state    real   td_zl  i{nz}j   misc    1  Z   h{22}  "TD_ZL"   "Height level data, Dew point temperature" "K"
-state    real   q_zl   i{nz}j   misc    1  Z   h{22}  "Q_ZL"    "Height level data, Mixing ratio"          "kg/kg"
+state    real   q_zl   i{nz}j   misc    1  Z   r  "Q_ZL"    "Height level data, Mixing ratio"          "kg/kg"
+state    real   wpd_zl i{nz}j   misc    1  Z   h{22}  "WPD_ZL"  "Height level data, Wind power density"    "W m-2"
+
+state    real  U_ZLMAX           i{nz}j misc        1         -      rh3       "U_ZLMAX"                "Height level data, U COMPONENT OF MAXIMUM WIND SPEED IN DIAGNOSTIC OUTPUT INTERVAL"   "m s-1"
+state    real  V_ZLMAX           i{nz}j misc        1         -      rh3       "V_ZLMAX"                "Height level data, V COMPONENT OF MAXIMUM WIND SPEED IN DIAGNOSTIC OUTPUT INTERVAL"   "m s-1"
+state    real  SPDUV_ZLMAX       i{nz}j misc        1         -      rh3       "SPDUV_ZLMAX"            "Height level data, MAXIMUM WIND SPEED IN DIAGNOSTIC OUTPUT INTERVAL"   "m s-1"
+state    real  TSPDUV_ZLMAX       i{nz}j      misc        1         -      rh3      "TSPDUV_ZLMAX"      "Height level data, TIME OF MAXIMUM WIND SPEED IN DIAGNOSTIC OUTPUT INTERVAL"             "minute"
+state    real  WPD_ZLMAX         i{nz}j misc        1         -      rh3       "WPD_ZLMAX"              "Height level data, MAXIMUM WIND POWER DENSITY IN DIAGNOSTIC OUTPUT INTERVAL"   "W m-2"
+state    real  TWPD_ZLMAX       i{nz}j      misc        1         -      rh3      "TWPD_ZLMAX"      "Height level data, TIME OF MAXIMUM WIND POWER DENSITY IN DIAGNOSTIC OUTPUT INTERVAL"             "minute"
+state    real  U_ZLSTD           i{nz}j misc        1         -      rh3       "U_ZLSTD"                "Height level data, STANDARD DEV. U IN DIAGNOSTIC OUTPUT INTERVAL"   "m s-1"
+state    real  V_ZLSTD           i{nz}j misc        1         -      rh3       "V_ZLSTD"                "Height level data, STANDARD DEV. U IN DIAGNOSTIC OUTPUT INTERVAL"   "m s-1"
+state    real  SPDUV_ZLSTD       i{nz}j misc        1         -      rh3       "SPDUV_ZLSTD"            "Height level data, STANDARD DEV. WIND SPEED IN DIAGNOSTIC OUTPUT INTERVAL"   "m s-1"
+state    real  WPD_ZLSTD         i{nz}j misc        1         -      rh3       "WPD_ZLSTD"              "Height level data, STANDARD DEV. WIND POWER DENSITY IN DIAGNOSTIC OUTPUT INTERVAL"   "W m-2"
+state    real  U_ZLMEAN           i{nz}j misc        1         -      rh3       "U_ZLMEAN"                "Height level data, MEAN U IN DIAGNOSTIC OUTPUT INTERVAL"   "m s-1"
+state    real  V_ZLMEAN           i{nz}j misc        1         -      rh3       "V_ZLMEAN"                "Height level data, MEAN U IN DIAGNOSTIC OUTPUT INTERVAL"   "m s-1"
+state    real  SPDUV_ZLMEAN       i{nz}j misc        1         -      rh3       "SPDUV_ZLMEAN"            "Height level data, MEAN WIND SPEED IN DIAGNOSTIC OUTPUT INTERVAL"   "m s-1"
+state    real  WPD_ZLMEAN         i{nz}j misc        1         -      rh3       "WPD_ZLMEAN"              "Height level data, MEAN WIND POWER DENSITY IN DIAGNOSTIC OUTPUT INTERVAL"   "W m-2"
 
 #  Package declarations
 
 package   skip_z_diags      z_lev_diags==0     -        -
-package        z_diags      z_lev_diags==1     -        state:z_zl,u_zl,v_zl,t_zl,rh_zl,ght_zl,s_zl,td_zl,q_zl
+package        z_diags      z_lev_diags==1     -        state:z_zl,u_zl,v_zl,t_zl,rh_zl,ght_zl,s_zl,td_zl,q_zl,wpd_zl
